@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waiza Attique — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#8B6914;
+    --burgundy:#6B1E3C;--burg-light:#9B2D57;--burg-dark:#3D0F22;
+    --black:#0A0806;--black2:#120D0A;--black3:#1C1510;
+    --cream:#F5EDD6;--cream2:#EDD9A3;
+    --text:#F0E6CC;--text2:#C4A96B;
+  }
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--black);
+    color:var(--text);
+    font-family:'Outfit',sans-serif;
+    overflow-x:hidden;
+    cursor:none;
+  }
+
+  /* Custom cursor */
+  #cursor{
+    position:fixed;width:12px;height:12px;
+    border-radius:50%;background:var(--gold);
+    pointer-events:none;z-index:9999;
+    transform:translate(-50%,-50%);
+    transition:transform 0.1s ease,width 0.3s,height 0.3s,background 0.3s;
+    mix-blend-mode:difference;
+  }
+  #cursor-ring{
+    position:fixed;width:36px;height:36px;
+    border-radius:50%;border:1px solid var(--gold);
+    pointer-events:none;z-index:9998;
+    transform:translate(-50%,-50%);
+    transition:transform 0.08s ease,width 0.3s,height 0.3s,opacity 0.3s;
+    opacity:0.5;
+  }
+
+  /* 3D Canvas */
+  #three-canvas{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    z-index:0;pointer-events:none;
+  }
+
+  /* Overlay grain */
+  .grain{
+    position:fixed;top:0;left:0;width:200%;height:200%;
+    z-index:1;pointer-events:none;opacity:0.03;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* NAV */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    padding:24px 60px;
+    display:flex;justify-content:space-between;align-items:center;
+    background:linear-gradient(to bottom,rgba(10,8,6,0.9),transparent);
+  }
+  .nav-logo{
+    font-family:'Cormorant Garamond',serif;
+    font-size:22px;font-weight:300;letter-spacing:0.15em;
+    color:var(--gold);text-decoration:none;
+  }
+  .nav-logo span{font-style:italic;color:var(--cream2)}
+  .nav-links{display:flex;gap:40px}
+  .nav-links a{
+    font-size:12px;letter-spacing:0.2em;text-transform:uppercase;
+    color:var(--text2);text-decoration:none;
+    transition:color 0.3s;font-weight:400;
+  }
+  .nav-links a:hover{color:var(--gold)}
+
+  /* SECTIONS */
+  section{position:relative;z-index:10;min-height:100vh}
+
+  /* HERO */
+  #hero{
+    display:flex;flex-direction:column;justify-content:center;
+    padding:0 60px;min-height:100vh;
+    background:radial-gradient(ellipse 80% 80% at 30% 50%,rgba(107,30,60,0.12) 0%,transparent 60%),
+               radial-gradient(ellipse 60% 60% at 80% 20%,rgba(201,168,76,0.08) 0%,transparent 50%);
+  }
+  .hero-eyebrow{
+    font-size:11px;letter-spacing:0.35em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:24px;opacity:0;
+    animation:fadeUp 0.8s ease 0.3s forwards;
+  }
+  .hero-name{
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(56px,9vw,120px);font-weight:300;
+    line-height:0.9;color:var(--cream);
+    opacity:0;animation:fadeUp 0.9s ease 0.5s forwards;
+  }
+  .hero-name em{
+    font-style:italic;color:var(--gold);
+    display:block;
+  }
+  .hero-tagline{
+    margin-top:32px;font-size:clamp(14px,1.5vw,17px);
+    color:var(--text2);font-weight:300;max-width:480px;
+    line-height:1.7;letter-spacing:0.02em;
+    opacity:0;animation:fadeUp 0.9s ease 0.7s forwards;
+  }
+  .hero-cta{
+    margin-top:48px;display:flex;gap:20px;align-items:center;
+    opacity:0;animation:fadeUp 0.9s ease 0.9s forwards;
+  }
+  .btn-primary{
+    padding:14px 36px;background:transparent;
+    border:1px solid var(--gold);color:var(--gold);
+    font-family:'Outfit',sans-serif;font-size:12px;
+    letter-spacing:0.2em;text-transform:uppercase;
+    cursor:none;text-decoration:none;
+    transition:background 0.3s,color 0.3s;
+    display:inline-block;
+  }
+  .btn-primary:hover{background:var(--gold);color:var(--black)}
+  .btn-ghost{
+    font-size:12px;letter-spacing:0.15em;color:var(--text2);
+    text-decoration:none;text-transform:uppercase;
+    transition:color 0.3s;
+  }
+  .btn-ghost:hover{color:var(--cream)}
+  .hero-scroll-hint{
+    position:absolute;bottom:40px;left:60px;
+    font-size:11px;letter-spacing:0.25em;color:var(--text2);
+    text-transform:uppercase;
+    display:flex;align-items:center;gap:12px;
+    opacity:0;animation:fadeIn 1s ease 1.5s forwards;
+  }
+  .scroll-line{width:40px;height:1px;background:var(--gold-dark)}
+
+  /* ABOUT */
+  #about{
+    display:grid;grid-template-columns:1fr 1fr;
+    gap:80px;align-items:center;
+    padding:120px 60px;
+    background:radial-gradient(ellipse 50% 80% at 90% 50%,rgba(107,30,60,0.08) 0%,transparent 60%);
+  }
+  .section-label{
+    font-size:11px;letter-spacing:0.35em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:20px;
+  }
+  .section-title{
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(36px,5vw,60px);font-weight:300;
+    line-height:1.1;color:var(--cream);margin-bottom:28px;
+  }
+  .section-title em{font-style:italic;color:var(--gold)}
+  .about-text{
+    font-size:16px;color:var(--text2);line-height:1.8;
+    font-weight:300;margin-bottom:20px;
+  }
+  .divider{width:60px;height:1px;background:var(--gold-dark);margin:32px 0}
+
+  /* SKILLS GRID */
+  .skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .skill-card{
+    border:1px solid rgba(201,168,76,0.15);
+    padding:20px 24px;
+    background:rgba(201,168,76,0.03);
+    transition:border-color 0.3s,background 0.3s;
+    position:relative;overflow:hidden;
+  }
+  .skill-card::before{
+    content:'';position:absolute;top:0;left:0;
+    width:2px;height:0;background:var(--gold);
+    transition:height 0.4s ease;
+  }
+  .skill-card:hover::before{height:100%}
+  .skill-card:hover{border-color:rgba(201,168,76,0.4);background:rgba(201,168,76,0.06)}
+  .skill-card-icon{font-size:20px;margin-bottom:10px}
+  .skill-card-title{font-size:13px;color:var(--gold);letter-spacing:0.1em;font-weight:500;margin-bottom:6px}
+  .skill-card-text{font-size:12px;color:var(--text2);line-height:1.6;font-weight:300}
+
+  /* EXPERTISE */
+  #expertise{
+    padding:120px 60px;
+    background:linear-gradient(to bottom,transparent,rgba(107,30,60,0.05),transparent);
+  }
+  .expertise-header{text-align:center;margin-bottom:80px}
+  .expertise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1100px;margin:0 auto}
+  .expertise-card{
+    border:1px solid rgba(201,168,76,0.12);
+    padding:40px 32px;
+    background:rgba(18,13,10,0.6);
+    position:relative;overflow:hidden;
+    transition:transform 0.4s ease,border-color 0.3s;
+  }
+  .expertise-card::after{
+    content:'';position:absolute;
+    bottom:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+    transform:scaleX(0);transition:transform 0.4s ease;
+  }
+  .expertise-card:hover{transform:translateY(-6px);border-color:rgba(201,168,76,0.35)}
+  .expertise-card:hover::after{transform:scaleX(1)}
+  .exp-number{
+    font-family:'Cormorant Garamond',serif;
+    font-size:48px;font-weight:300;color:rgba(201,168,76,0.15);
+    line-height:1;margin-bottom:16px;
+  }
+  .exp-title{
+    font-size:14px;letter-spacing:0.15em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:12px;font-weight:500;
+  }
+  .exp-text{font-size:14px;color:var(--text2);line-height:1.7;font-weight:300}
+  .exp-tools{
+    margin-top:20px;display:flex;flex-wrap:wrap;gap:8px;
+  }
+  .tool-tag{
+    font-size:10px;letter-spacing:0.15em;text-transform:uppercase;
+    color:var(--gold-dark);border:1px solid rgba(201,168,76,0.2);
+    padding:4px 10px;font-weight:400;
+  }
+ 
+
+  /* PORTFOLIO */
+  #portfolio{padding:120px 60px}
+  .portfolio-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:60px}
+  .portfolio-item{
+    position:relative;overflow:hidden;
+    background:var(--black3);
+    aspect-ratio:4/3;
+    cursor:none;
+  }
+  .portfolio-item-inner{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;
+    justify-content:flex-end;padding:32px;
+    background:linear-gradient(to top,rgba(10,8,6,0.95) 0%,rgba(10,8,6,0.4) 50%,transparent 100%);
+  }
+  .portfolio-bg{
+    position:absolute;inset:0;
+    transition:transform 0.6s ease;
+  }
+  .portfolio-item:hover .portfolio-bg{transform:scale(1.05)}
+  .portfolio-cat{
+    font-size:10px;letter-spacing:0.3em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:8px;
+  }
+  .portfolio-title{
+    font-family:'Cormorant Garamond',serif;
+    font-size:24px;font-weight:300;color:var(--cream);
+  }
+ 
+  .bg1 {
+  background-image: url('images/eclipse_ai_thumbnail.jpg');
+  background-size: cover;
+  background-position: center;
+}
+  .bg2{background:linear-gradient(135deg,#0a100a 0%,#1a2a10 40%,#2d4a1a 100%)}
+  .bg3{background:linear-gradient(135deg,#0a0a1a 0%,#10102a 40%,#1a1a4a 100%)}
+  .bg4{background:linear-gradient(135deg,#1a1000 0%,#3a2200 40%,#6B4A14 100%)}
+  .portfolio-hover-line{
+    position:absolute;bottom:0;left:0;width:0;height:2px;
+    background:var(--gold);transition:width 0.5s ease;
+  }
+  .portfolio-item:hover .portfolio-hover-line{width:100%}
+
+
+  /* CONTACT */
+  #contact{
+    padding:120px 60px;
+    display:flex;flex-direction:column;align-items:center;
+    text-align:center;
+    background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(107,30,60,0.15) 0%,transparent 60%);
+  }
+  .contact-title{
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(48px,8vw,100px);font-weight:300;
+    color:var(--cream);line-height:0.95;margin-bottom:32px;
+  }
+  .contact-title em{font-style:italic;color:var(--gold);display:block}
+  .contact-sub{
+    font-size:15px;color:var(--text2);max-width:460px;
+    line-height:1.7;margin-bottom:48px;font-weight:300;
+  }
+  .contact-links{display:flex;gap:32px;margin-bottom:80px}
+  .contact-link{
+    font-size:11px;letter-spacing:0.25em;text-transform:uppercase;
+    color:var(--text2);text-decoration:none;
+    padding-bottom:4px;
+    border-bottom:1px solid transparent;
+    transition:color 0.3s,border-color 0.3s;
+  }
+  .contact-link:hover{color:var(--gold);border-color:var(--gold)}
+
+  /* FOOTER */
+  footer{
+    border-top:1px solid rgba(201,168,76,0.1);
+    padding:24px 60px;
+    display:flex;justify-content:space-between;align-items:center;
+    position:relative;z-index:10;
+  }
+  .footer-copy{font-size:11px;color:var(--text2);letter-spacing:0.1em}
+  .footer-name{
+    font-family:'Cormorant Garamond',serif;
+    font-size:13px;color:var(--gold);letter-spacing:0.15em;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(30px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+  .reveal{
+    opacity:0;transform:translateY(40px);
+    transition:opacity 0.9s ease,transform 0.9s ease;
+  }
+  .reveal.visible{opacity:1;transform:translateY(0)}
+
+  .gold-line{
+    width:60px;height:1px;background:var(--gold);
+    display:inline-block;vertical-align:middle;margin-right:16px;
+  }
+
+  /* TECH STACK ICONS */
+  .tech-grid{
+    display:grid;grid-template-columns:repeat(5,1fr);
+    gap:16px;margin-bottom:8px;
+  }
+  .tech-item{
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    padding:18px 10px;
+    border:1px solid rgba(201,168,76,0.12);
+    background:rgba(201,168,76,0.03);
+    transition:border-color 0.3s,background 0.3s,transform 0.3s;
+    cursor:default;
+  }
+  .tech-item:hover{
+    border-color:rgba(201,168,76,0.4);
+    background:rgba(201,168,76,0.07);
+    transform:translateY(-4px);
+  }
+  .tech-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+  .tech-icon svg{width:100%;height:100%}
+  .tech-name{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text2);font-weight:400;text-align:center}
+
+  /* INLINE VOLUNTEER */
+  .vol-card-inline{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    border:1px solid rgba(201,168,76,0.15);
+    padding:20px 24px;
+    background:rgba(201,168,76,0.03);
+    border-left:3px solid var(--gold);
+    margin-bottom:14px;
+  }
+  .vol-org-sm{font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;font-weight:500}
+  .vol-role-sm{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:var(--cream);margin-bottom:4px}
+  .vol-role-sm em{font-style:italic;color:var(--gold)}
+  .vol-date-sm{font-size:11px;color:var(--text2);letter-spacing:0.1em}
+  .vol-badge-sm{
+    font-size:9px;letter-spacing:0.2em;text-transform:uppercase;
+    color:var(--black);background:var(--gold);
+    padding:5px 12px;font-weight:500;white-space:nowrap;align-self:flex-start;
+  }
+  .vol-body{font-size:14px;color:var(--text2);line-height:1.8;font-weight:300;font-style:italic}
+
+  /* VOLUNTEER */
+  #volunteer{
+    padding:120px 60px;
+    background:radial-gradient(ellipse 60% 50% at 20% 50%,rgba(201,168,76,0.05) 0%,transparent 60%);
+  }
+  .volunteer-inner{
+    max-width:900px;margin:0 auto;
+  }
+  .vol-card{
+    border:1px solid rgba(201,168,76,0.15);
+    padding:48px 52px;
+    background:rgba(18,13,10,0.7);
+    position:relative;overflow:hidden;
+    margin-top:60px;
+  }
+  .vol-card::before{
+    content:'';position:absolute;top:0;left:0;
+    width:3px;height:100%;
+    background:linear-gradient(to bottom,var(--gold),var(--burgundy));
+  }
+  .vol-card::after{
+    content:'';position:absolute;
+    top:0;right:0;width:180px;height:180px;
+    background:radial-gradient(ellipse at top right,rgba(201,168,76,0.06),transparent 70%);
+    pointer-events:none;
+  }
+  .vol-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+  .vol-role{
+    font-family:'Cormorant Garamond',serif;
+    font-size:28px;font-weight:300;color:var(--cream);
+    line-height:1.2;
+  }
+  .vol-role em{font-style:italic;color:var(--gold)}
+  .vol-badge{
+    font-size:10px;letter-spacing:0.25em;text-transform:uppercase;
+    color:var(--black);background:var(--gold);
+    padding:6px 14px;font-weight:500;white-space:nowrap;
+    align-self:flex-start;
+  }
+  .vol-org{
+    font-size:13px;letter-spacing:0.2em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:6px;font-weight:500;
+  }
+  .vol-date{
+    font-size:12px;color:var(--text2);letter-spacing:0.1em;
+    margin-bottom:28px;
+  }
+  .vol-divider{width:40px;height:1px;background:var(--gold-dark);margin-bottom:24px}
+  .vol-tagline{
+    font-family:'Cormorant Garamond',serif;
+    font-size:19px;font-style:italic;color:var(--cream2);
+    margin-bottom:16px;line-height:1.4;
+  }
+  .vol-text{
+    font-size:15px;color:var(--text2);line-height:1.85;
+    font-weight:300;
+  }
+
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    nav{padding:20px 24px}
+    .nav-links{gap:20px}
+    #hero{padding:0 24px}
+    #about{grid-template-columns:1fr;padding:80px 24px;gap:40px}
+    .tech-grid{grid-template-columns:repeat(3,1fr)}
+    #expertise{padding:80px 24px}
+    .expertise-grid{grid-template-columns:1fr}
+    #portfolio{padding:80px 24px}
+    .portfolio-grid{grid-template-columns:1fr}
+    #contact{padding:80px 24px}
+    #volunteer{padding:80px 24px}
+    .vol-card{padding:32px 24px}
+    .vol-header{flex-direction:column}
+    footer{padding:20px 24px}
+    .contact-links{flex-wrap:wrap;justify-content:center;gap:20px}
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div class="grain"></div>
+<canvas id="three-canvas"></canvas>
+
+<nav>
+  <a class="nav-logo" href="#hero">W<span>A</span></a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#expertise">Expertise</a>
+    <a href="#portfolio">Work</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-eyebrow"><span class="gold-line"></span>Frontend Developer & UI/UX Designer</div>
+  <h1 class="hero-name">Waiza<em>Attique</em></h1>
+  <p class="hero-tagline">Crafting premium digital experiences where elegant design meets functional code — from pixel-perfect interfaces to full-stack solutions.</p>
+  <div class="hero-cta">
+    <a href="#portfolio" class="btn-primary">View My Work</a>
+    <a href="https://mail.google.com/mail/?view=cm&to=waizaaattiquekhan@gmail.com" target="_blank" class="btn-ghost">Get In Touch →</a>
+  </div>
+  <div class="hero-scroll-hint"><span class="scroll-line"></span>Scroll to explore</div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="reveal">
+    <p class="section-label"><span class="gold-line"></span>About Me</p>
+    <h2 class="section-title">Design that<em>feels intentional</em></h2>
+    <p class="about-text">I'm Waiza Attique — A Frontend Developer and UI/UX Designer with a passion for creating experiences that are as beautiful as they are functional. I bring ideas to life through thoughtful design and clean, efficient code.</p>
+    <p class="about-text">My approach bridges the gap between design thinking and technical execution, ensuring every project is both visually stunning and technically sound.</p>
+    <div class="divider"></div>
+
+    <!-- TECH STACK ICONS -->
+    <p class="section-label" style="margin-bottom:20px">Tech Stack</p>
+    <div class="tech-grid">
+
+      <div class="tech-item">
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 19.988V4.011a1.5 1.5 0 0 0-.85-1.424zm-5.146 14.861L10.826 12l7.178-5.448v10.896z" fill="#C9A84C"/></svg>
+        </div>
+        <span class="tech-name">VS Code</span>
+      </div>
+
+      <div class="tech-item">
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.546 10.93L13.067.452a1.55 1.55 0 0 0-2.188 0L8.708 2.627l2.76 2.76a1.838 1.838 0 0 1 2.327 2.341l2.658 2.66a1.838 1.838 0 1 1-1.103 1.034l-2.48-2.48v6.511a1.838 1.838 0 1 1-1.51-.036V9.32a1.838 1.838 0 0 1-.987-2.41L7.617 4.215 .45 11.38a1.55 1.55 0 0 0 0 2.188l10.48 10.478a1.55 1.55 0 0 0 2.186 0l10.43-10.43a1.55 1.55 0 0 0 0-2.187" fill="#C9A84C"/></svg>
+        </div>
+        <span class="tech-name">Git</span>
+      </div>
+
+      <div class="tech-item">
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z" fill="#C9A84C"/></svg>
+        </div>
+        <span class="tech-name">JavaScript</span>
+      </div>
+
+      <div class="tech-item">
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.564-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622L5.412 4.41l.698 8.01h9.126l-.326 3.426-2.91.804-2.955-.81-.188-2.11H6.248l.33 4.171L12 19.351l5.379-1.443.744-8.157H8.531z" fill="#C9A84C"/></svg>
+        </div>
+        <span class="tech-name">HTML</span>
+      </div>
+
+      <div class="tech-item">
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.565-2.438L1.5 0zm17.09 4.413L5.41 4.41l.213 2.622 10.125.003-.238 2.965-4.385.001-4.382-.004-.238 2.97h4.629l-.122 1.596-2.249.782-2.248-.782-.13-1.452H5.011l.24 2.573 4.164 1.349 4.192-1.347.556-6.22.106-1.128z" fill="#C9A84C"/></svg>
+        </div>
+        <span class="tech-name">CSS</span>
+      </div>
+
+      <div class="tech-item">
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.29zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z" fill="#C9A84C"/></svg>
+        </div>
+        <span class="tech-name">React.js</span>
+      </div>
+
+      <div class="tech-item">
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16.405 5.501c-.115 0-.193.014-.274.033v.013h.014c.054.104.146.18.214.273.054.107.1.214.154.32l.014-.015c.094-.066.14-.172.14-.333-.04-.047-.046-.094-.08-.14-.04-.067-.126-.1-.18-.15zM5.77 18.695h-.927a50.854 50.854 0 0 0-.27-4.41h-.008l-1.41 4.41H2.45l-1.4-4.41h-.01a72.892 72.892 0 0 0-.195 4.41H0c.055-1.966.192-3.81.41-5.53h1.15l1.335 4.064h.008l1.347-4.064h1.095c.242 2.015.384 3.86.428 5.53zm4.017-4.08h-2.316v1.346h2.065v.92h-2.065v1.458h2.316v.96H6.47v-5.53h3.317v.845zm2.152 2.858l.347 1.77h-1.016l-1.37-5.53h1.096l.896 3.95.012-.003.896-3.947h1.095l-1.37 5.53h-1.015l.355-1.772h-1.927zm5.477-2.858h-1.63v4.59h-.995v-4.59H13.8v-.94h3.617v.94zm3.665 4.59c-.073-1.088-.127-2.175-.16-3.264a4.89 4.89 0 0 1-.027-.636c-.037.115-.09.23-.133.345L19.8 18.695h-.787l-1.037-2.858c-.05-.12-.083-.245-.12-.37-.053 1.111-.1 2.222-.15 3.228h-.943c.11-1.963.228-3.81.374-5.53h1.007l1.285 3.424c.05.14.092.28.133.42.04-.14.087-.28.133-.42l1.285-3.424h1.007c.146 1.72.264 3.567.374 5.53h-.962zm.584-8.15c-.07-.28-.226-.506-.467-.68a1.47 1.47 0 0 0-.754-.2c-.215 0-.395.035-.545.1-.15.067-.27.156-.36.27a1.01 1.01 0 0 0-.194.393 1.85 1.85 0 0 0-.054.467c0 .147.018.283.054.41.036.127.093.235.168.32.076.085.168.15.276.196.107.048.227.072.36.072.147 0 .278-.024.39-.07a.83.83 0 0 0 .287-.196.9.9 0 0 0 .174-.32c.04-.13.06-.27.06-.41a1.77 1.77 0 0 0-.06-.465c.006.002.006.002.013.002-.006-.003-.006-.003-.012-.003h-.001zm.01-1.6c.48.014.87.177 1.166.488.3.312.454.726.454 1.24 0 .36-.064.682-.193.967a2.099 2.099 0 0 1-.518.718 2.25 2.25 0 0 1-.773.443 2.84 2.84 0 0 1-.945.153 2.807 2.807 0 0 1-.94-.154 2.217 2.217 0 0 1-.77-.443 2.124 2.124 0 0 1-.518-.718 2.348 2.348 0 0 1-.193-.967c0-.513.154-.928.462-1.24.307-.31.697-.474 1.167-.488v-.014c-.482 0-.887-.163-1.215-.49-.327-.328-.49-.733-.49-1.215 0-.346.068-.658.205-.938.136-.28.32-.52.55-.72.23-.2.495-.355.793-.467a2.74 2.74 0 0 1 .963-.168c.334 0 .653.056.957.168.305.112.57.267.797.467.226.2.407.44.543.72.135.28.202.592.202.938 0 .482-.163.887-.49 1.215-.326.327-.73.49-1.213.49v.014z" fill="#C9A84C"/></svg>
+        </div>
+        <span class="tech-name">MySQL</span>
+      </div>
+
+      <div class="tech-item">
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05L0 11.97l.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.26-.02.21-.01h5.74l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.26.02-.21V6.07h2.09l.14.01zm-6.47 14.25l-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09z" fill="#C9A84C"/></svg>
+        </div>
+        <span class="tech-name">Python</span>
+      </div>
+
+      <div class="tech-item">
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.852 8.981h-4.588V0h4.588c2.476 0 4.490 2.014 4.490 4.490s-2.014 4.491-4.490 4.491zM12.735 7.51h3.117c1.665 0 3.019-1.355 3.019-3.020 0-1.665-1.354-3.019-3.019-3.019h-3.117V7.51zm0 1.471H8.148c-2.476 0-4.490-2.014-4.490-4.490S5.672 0 8.148 0h4.588v8.981zm-4.587-7.51c-1.665 0-3.019 1.354-3.019 3.019 0 1.665 1.354 3.020 3.019 3.020h3.117V1.471H8.148zm4.587 15.019H3.660v-4.588c0-2.476 2.014-4.490 4.490-4.490 2.476 0 4.490 2.014 4.490 4.490v4.588zm-7.510-1.471h6.039v-3.117c0-1.665-1.354-3.019-3.019-3.019-1.665 0-3.020 1.354-3.020 3.019v3.117zm7.510 7.510h-4.588c-2.476 0-4.490-2.014-4.490-4.490s2.014-4.491 4.490-4.491h4.588v8.981zm-4.587-7.510c-1.665 0-3.019 1.355-3.019 3.020 0 1.665 1.354 3.019 3.019 3.019h3.117v-6.039H8.148zm12.219 7.510h-4.588v-8.981h4.588c2.476 0 4.490 2.015 4.490 4.491s-2.014 4.490-4.490 4.490zm-3.117-1.471h3.117c1.665 0 3.019-1.354 3.019-3.019 0-1.665-1.354-3.020-3.019-3.020h-3.117v6.039z" fill="#C9A84C"/></svg>
+        </div>
+        <span class="tech-name">Figma</span>
+      </div>
+
+      <div class="tech-item">
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 12s-4.799 6.5-12 6.5S0 12 0 12 4.799 5.5 12 5.5 24 12 24 12zm-12 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" fill="#C9A84C"/></svg>
+        </div>
+        <span class="tech-name">Canva</span>
+      </div>
+
+    </div>
+
+    <!-- VOLUNTEER inside About -->
+    <div class="divider"></div>
+    <p class="section-label" style="margin-bottom:20px">Volunteer Experience</p>
+    <div class="vol-card-inline">
+      <div class="vol-inline-left">
+        <div class="vol-org-sm">Safare Adab</div>
+        <div class="vol-role-sm">Publishing Content  <em>Coordinator</em></div>
+        <div class="vol-date-sm">✦ Nov 2025 — Nov 2026</div>
+      </div>
+      <div class="vol-badge-sm">Volunteer</div>
+    </div>
+    <p class="vol-body">"Curating voices, shaping narratives." — As  Publishing Content Coordinator at Safar e Adab, I manage and publish thoughtfully crafted content across the organization's digital platform, ensuring every piece is presented with clarity, consistency, and intention. This role deepened my understanding of how design and content work together to create meaningful digital experiences.</p>
+
+  </div>
+  <div class="reveal" style="transition-delay:0.2s">
+    <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px;opacity:0.85">
+      <defs>
+        <radialGradient id="rg1" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#6B1E3C" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <circle cx="250" cy="250" r="200" fill="url(#rg1)"/>
+      <circle cx="250" cy="250" r="200" fill="none" stroke="#C9A84C" stroke-width="0.5" stroke-dasharray="4 8" opacity="0.4"/>
+      <circle cx="250" cy="250" r="160" fill="none" stroke="#6B1E3C" stroke-width="0.5" opacity="0.5"/>
+      <circle cx="250" cy="250" r="120" fill="none" stroke="#C9A84C" stroke-width="0.5" opacity="0.3"/>
+      <circle cx="250" cy="250" r="80" fill="none" stroke="#6B1E3C" stroke-width="0.5" stroke-dasharray="2 6" opacity="0.4"/>
+      <line x1="50" y1="250" x2="450" y2="250" stroke="#C9A84C" stroke-width="0.3" opacity="0.25"/>
+      <line x1="250" y1="50" x2="250" y2="450" stroke="#C9A84C" stroke-width="0.3" opacity="0.25"/>
+      <polygon points="250,30 262,50 250,70 238,50" fill="#C9A84C" opacity="0.5"/>
+      <polygon points="250,430 262,450 250,470 238,450" fill="#C9A84C" opacity="0.5"/>
+      <polygon points="30,250 50,262 70,250 50,238" fill="#6B1E3C" opacity="0.6"/>
+      <polygon points="430,250 450,262 470,250 450,238" fill="#6B1E3C" opacity="0.6"/>
+      <circle cx="250" cy="250" r="8" fill="#C9A84C" opacity="0.8"/>
+      <circle cx="250" cy="250" r="3" fill="#F5EDD6"/>
+      <circle cx="250" cy="90" r="4" fill="#C9A84C" opacity="0.6"/>
+      <circle cx="390" cy="160" r="3" fill="#9B2D57" opacity="0.6"/>
+      <circle cx="370" cy="340" r="5" fill="#C9A84C" opacity="0.4"/>
+      <circle cx="130" cy="330" r="3" fill="#9B2D57" opacity="0.5"/>
+      <circle cx="110" cy="160" r="4" fill="#C9A84C" opacity="0.5"/>
+    </svg>
+  </div>
+</section>
+
+<!-- EXPERTISE -->
+<section id="expertise">
+  <div class="expertise-header reveal">
+    <p class="section-label"><span class="gold-line"></span>What I Do</p>
+    <h2 class="section-title">Areas of <em>Expertise</em></h2>
+  </div>
+  <div class="expertise-grid">
+    <div class="expertise-card reveal">
+      <div class="exp-number">01</div>
+      <div class="exp-title">UI/UX Design</div>
+      <p class="exp-text">Designing intuitive interfaces with a meticulous eye for detail. From wireframes to high-fidelity prototypes, I create experiences users love.</p>
+      <div class="exp-tools"><span class="tool-tag">Figma</span><span class="tool-tag">Canva</span><span class="tool-tag">Wireframing</span><span class="tool-tag">Prototyping</span></div>
+    </div>
+    <div class="expertise-card reveal" style="transition-delay:0.1s">
+      <div class="exp-number">02</div>
+      <div class="exp-title">Frontend Dev</div>
+      <p class="exp-text">Building responsive, performant web applications with modern technologies. Clean code, smooth animations, seamless interactions.</p>
+      <div class="exp-tools"><span class="tool-tag">React.js</span><span class="tool-tag">JavaScript</span><span class="tool-tag">HTML/CSS</span></div>
+    </div>
+    <div class="expertise-card reveal" style="transition-delay:0.2s">
+      <div class="exp-number">03</div>
+      <div class="exp-title">Python Dev</div>
+      <p class="exp-text">Backend scripting, automation, and data-driven solutions. Bridging the gap between frontend elegance and backend functionality.</p>
+      <div class="exp-tools"><span class="tool-tag">Python</span><span class="tool-tag">Scripting</span><span class="tool-tag">Automation</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO -->
+<section id="portfolio">
+  <div class="reveal">
+  
+  <p class="section-label">
+    <span class="gold-line"></span>
+    Selected Work
+  </p>
+
+  <h2 class="section-title">
+    Recent <em>Projects</em>
+  </h2>
+
+  <div class="portfolio-grid">
+
+    <!-- PROJECT 1 -->
+    <a 
+      href="https://www.figma.com/design/xxP8vgJ5f6V6zc0gu3WpFf/the-eclispe-.-ai?t=XTW59WMM9CFqCAPl-1"
+      target="_blank"
+      class="portfolio-item reveal"
+    >
+
+      <div class="portfolio-bg bg1"></div>
+
+      <div class="portfolio-item-inner">
+
+        <div class="portfolio-cat">
+          UI/UX Design
+        </div>
+
+       <div class="portfolio-title"> The Eclipse.AI (In Progress) <span> — A clean, minimal UI/UX concept for an AI-powered student workspace. Combines note-taking, planning, reminders, and an AI tutor in one place. Light-mode first design, built in Figma.</span> </div>
+
+      </div>
+
+      <div class="portfolio-hover-line"></div>
+
+    </a>
+
+    <!-- PROJECT 2 -->
+    <div class="portfolio-item reveal" style="transition-delay:0.1s">
+
+      <div class="portfolio-bg bg2"></div>
+
+      <div class="portfolio-item-inner">
+
+        <div class="portfolio-cat">
+          Personal Portfolio
+        </div>
+
+        <div class="portfolio-title">
+          Luxury Interactive Portfolio
+        </div>
+
+      </div>
+
+      <div class="portfolio-hover-line"></div>
+
+    </div>
+
+  </div>
+
+</div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="reveal">
+    <p class="section-label" style="margin-bottom:24px"><span class="gold-line"></span>Let's Connect</p>
+    <h2 class="contact-title">Ready to<em>create together?</em></h2>
+    <p class="contact-sub">Available for freelance projects, full-time roles, and creative collaborations. Let's build something extraordinary.</p>
+    <div class="contact-links">
+      <a href="https://mail.google.com/mail/?view=cm&fs=1&to=waizaaattiquekhan@email.com&su=Portfolio%20Inquiry&body=Hello%20Waiza,"" class="contact-link">Email</a>
+      <a href="https://www.linkedin.com/in/waiza-attique-khan-589281330" class="contact-link">LinkedIn</a>
+      <a href="https://github.com/waizaattique" class="contact-link">GitHub</a>
+     
+    </div>
+    <a  href="https://mail.google.com/mail/?view=cm&fs=1&to=waizaaattiquekhan@email.com&su=Portfolio%20Inquiry&body=Hello%20Waiza," class="btn-primary">Say Hello</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-copy">© 2026 Waiza Attique. All rights reserved.</div>
+  <div class="footer-name">WA</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// Custom cursor
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px'});
+function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing)}
+animRing();
+document.querySelectorAll('a,button,.portfolio-item,.skill-card,.expertise-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(2)';ring.style.transform='translate(-50%,-50%) scale(1.5)';ring.style.opacity='0.8'});
+  el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';ring.style.transform='translate(-50%,-50%) scale(1)';ring.style.opacity='0.5'});
+});
+
+// THREE.JS 3D background
+const canvas=document.getElementById('three-canvas');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setClearColor(0x000000,0);
+
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,1000);
+camera.position.z=30;
+
+// Particle system
+const count=2000;
+const geo=new THREE.BufferGeometry();
+const pos=new Float32Array(count*3);
+const col=new Float32Array(count*3);
+const goldR=201/255,goldG=168/255,goldB=76/255;
+const burgR=107/255,burgG=30/255,burgB=60/255;
+for(let i=0;i<count;i++){
+  pos[i*3]=(Math.random()-0.5)*80;
+  pos[i*3+1]=(Math.random()-0.5)*80;
+  pos[i*3+2]=(Math.random()-0.5)*60;
+  const t=Math.random();
+  if(t<0.6){col[i*3]=goldR;col[i*3+1]=goldG;col[i*3+2]=goldB}
+  else{col[i*3]=burgR;col[i*3+1]=burgG;col[i*3+2]=burgB}
+}
+geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+const mat=new THREE.PointsMaterial({size:0.12,vertexColors:true,transparent:true,opacity:0.6,sizeAttenuation:true});
+const particles=new THREE.Points(geo,mat);
+scene.add(particles);
+
+// Floating wireframe spheres
+function addSphere(x,y,z,r,color,opacity){
+  const g=new THREE.SphereGeometry(r,16,16);
+  const m=new THREE.MeshBasicMaterial({color,wireframe:true,transparent:true,opacity});
+  const s=new THREE.Mesh(g,m);
+  s.position.set(x,y,z);
+  scene.add(s);
+  return s;
+}
+const sphere1=addSphere(-12,5,-10,6,0xC9A84C,0.06);
+const sphere2=addSphere(15,-3,-15,8,0x6B1E3C,0.08);
+const sphere3=addSphere(3,12,-20,4,0xC9A84C,0.04);
+
+let mouseX=0,mouseY=0;
+document.addEventListener('mousemove',e=>{
+  mouseX=(e.clientX/window.innerWidth-0.5)*0.5;
+  mouseY=(e.clientY/window.innerHeight-0.5)*0.5;
+});
+
+let t=0;
+function animate(){
+  requestAnimationFrame(animate);
+  t+=0.003;
+  particles.rotation.y=t*0.05;
+  particles.rotation.x=t*0.02;
+  sphere1.rotation.y=t*0.3;sphere1.rotation.x=t*0.2;
+  sphere2.rotation.y=-t*0.2;sphere2.rotation.z=t*0.1;
+  sphere3.rotation.x=t*0.4;sphere3.rotation.z=t*0.15;
+  camera.position.x+=(mouseX*6-camera.position.x)*0.05;
+  camera.position.y+=(-mouseY*4-camera.position.y)*0.05;
+  camera.lookAt(scene.position);
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+// Scroll reveal
+const revealEls=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible')}});
+},{threshold:0.15});
+revealEls.forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
